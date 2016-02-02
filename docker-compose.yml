@@ -1,0 +1,30 @@
+byt:
+  image: maxwayt/byt:latest
+  volumes:
+    - "/local/data:/data"
+  environment:
+    - VIRTUAL_HOST=your-domain.com
+    - VIRTUAL_PORT=8080
+    - LETSENCRYPT_HOST=your-domain.com
+    - LETSENCRYPT_EMAIL=you@your-domain.com
+  restart: always
+
+nginx-proxy:
+  image: jwilder/nginx-proxy
+  ports:
+    - "80:80"
+    - "443:443"
+  volumes:
+    - "/local/nginx/certs:/etc/nginx/certs:ro"
+    - "/etc/nginx/vhost.d"
+    - "/usr/share/nginx/html"
+    - "/var/run/docker.sock:/tmp/docker.sock:ro"
+  restart: always
+
+letsencrypt:
+  image: jrcs/letsencrypt-nginx-proxy-companion
+  volumes:
+    - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    - "/local/nginx/certs:/etc/nginx/certs:rw"
+  volumes_from:
+    - "nginx-proxy"
